@@ -7,9 +7,23 @@
 // - la clave va en api/.env (ORS_API_KEY). Sin clave no consulta nada.
 // Si ORS no responde, tarda o contesta algo inesperado, devuelve null para cada destino y la convocatoria
 // muestra solo la distancia en línea recta, como antes del TP3.
+// Modo demostración (ORS_DEMO=true en api/.env): no consulta a ORS y devuelve una distancia simulada,
+// la línea recta × 1,3. Es para mostrar la pantalla sin clave o sin servicio; el front avisa que es simulada.
+const { distanciaKm } = require('./distancia');
+
 const URL_MATRIZ = 'https://api.openrouteservice.org/v2/matrix/driving-car';
 const TIEMPO_MAXIMO = 6000;
 const MAXIMO_DESTINOS = 3500;
+const FACTOR_DEMO = 1.3; // supuesto para la demostración, no una medición: por calle suele ser algo más largo
+
+const modoDemo = () => process.env.ORS_DEMO === 'true';
+
+function distanciasSimuladas(origen, destinos) {
+  return destinos.map((destino) => {
+    const recta = distanciaKm(Number(origen.lat), Number(origen.lon), Number(destino.lat), Number(destino.lon));
+    return Math.round(recta * FACTOR_DEMO * 100) / 100;
+  });
+}
 
 // { lat, lon } → [lon, lat]: ORS pide primero la longitud
 const aCoordenadaOrs = (punto) => [Number(punto.lon), Number(punto.lat)];
@@ -17,6 +31,8 @@ const aCoordenadaOrs = (punto) => [Number(punto.lon), Number(punto.lat)];
 // Kilómetros por calle desde el origen hasta cada destino, en el mismo orden que los destinos.
 // origen y cada destino: { lat, lon }. Un destino sin camino posible (por ejemplo, del otro lado del mar) da null.
 async function distanciasPorCalle(origen, destinos) {
+  if (modoDemo()) return distanciasSimuladas(origen, destinos);
+
   const sinDatos = destinos.map(() => null);
   const clave = process.env.ORS_API_KEY?.trim();
   if (!clave || destinos.length === 0 || destinos.length > MAXIMO_DESTINOS) return sinDatos;
@@ -47,4 +63,4 @@ async function distanciasPorCalle(origen, destinos) {
   }
 }
 
-module.exports = { distanciasPorCalle };
+module.exports = { distanciasPorCalle, modoDemo };
