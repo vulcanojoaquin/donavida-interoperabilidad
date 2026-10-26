@@ -3,6 +3,75 @@
 Red de donación de sangre en tiempo real y gestión de inventario entre bancos de sangre.
 Trabajo Final de la Tecnicatura en Desarrollo Web — Grupo Código Rojo (Alday, Pizarro, Vulcano).
 
+## Trabajo Práctico N°3 (Frameworks e Interoperabilidad)
+
+Este repositorio es una copia del Trabajo Final ([fidelpizarro3/donavida](https://github.com/fidelpizarro3/donavida))
+tal como quedó en el Sprint 2, para hacer acá el TP3 de Frameworks e Interoperabilidad sin mezclar las dos materias.
+Los repositorios no están conectados: lo que se sube acá no llega al del Trabajo Final, ni al revés.
+
+### Antes de arrancar (si ya tenías clonado el Trabajo Final)
+
+**1. Aceptá la invitación** de colaborador que te llegó por mail desde GitHub.
+
+**2. Cloná este repo en una carpeta nueva.** No reutilices la carpeta del Trabajo Final. Mejor fuera de OneDrive,
+porque OneDrive intenta sincronizar los miles de archivos de `node_modules`.
+
+```bash
+git clone https://github.com/vulcanojoaquin/donavida-interoperabilidad.git
+```
+
+**3. Copiá tu `api/.env`** desde la carpeta del Trabajo Final a la misma ruta en la carpeta nueva. Git lo ignora:
+no se sube. En el paso 5 le cambiás la base.
+
+**4. Instalá las dependencias y generá el cliente de Prisma:**
+
+```bash
+cd api
+npm install
+npx prisma generate
+cd ../web
+npm install
+```
+
+`npx prisma generate` hace falta una vez: sin eso los tests pasan (simulan la base), pero la API no arranca y muestra
+`@prisma/client did not initialize yet`.
+
+**5. Creá la base del TP3, separada de la del Trabajo Final.** Las dos carpetas usan el mismo servidor PostgreSQL
+(`docker-compose.yml` fija el nombre del proyecto en `donavida`), pero cada una con su base: `donavida` para el
+Trabajo Final y `donavida_tp3` para este repo. Así, lo que se cargue o se migre acá no toca los datos del Trabajo Final.
+
+Con la base levantada (`docker compose up -d`), desde la raíz de este repo:
+
+```bash
+docker compose exec -T db createdb -U donavida donavida_tp3
+docker compose exec -T db sh -c "pg_dump -U donavida donavida | psql -q -U donavida donavida_tp3"
+```
+
+El primero crea la base; el segundo le copia los datos que tenés hoy en la del Trabajo Final, así arrancás con los
+mismos usuarios e instituciones. La base del Trabajo Final solo se lee.
+
+Después, en tu `api/.env`, cambiá el nombre de la base al final de `DATABASE_URL` (como en `api/.env.example`):
+
+```
+DATABASE_URL="postgresql://donavida:donavida@localhost:5433/donavida_tp3?schema=public"
+```
+
+Para comprobarlo, desde `api/`: `npx prisma migrate status` tiene que decir `PostgreSQL database "donavida_tp3"`.
+
+**No corras `docker compose down -v`:** las dos bases están en el mismo volumen y se borrarían las dos.
+
+**6. Comprobá que todo anda** antes de tocar nada:
+
+| Dónde | Comando | Resultado esperado |
+|---|---|---|
+| `api/` | `npm test` | Todos los tests pasan |
+| `web/` | `npm run lint` | Sin errores |
+| `web/` | `npm run build` | Build sin errores |
+| `api/` | `npm run dev` | http://localhost:3000/api/health responde `{"ok":true}` |
+
+Si no tenías el Trabajo Final clonado, seguí [Levantar el proyecto por primera vez](#levantar-el-proyecto-por-primera-vez):
+ahí `npm run db:migrate` crea la base `donavida_tp3` (vacía), sus tablas y el cliente de Prisma.
+
 ## Estructura
 
 ```
