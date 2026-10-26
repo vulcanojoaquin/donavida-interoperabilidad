@@ -6,10 +6,13 @@
 //   2) En JS: tope de alertas del mes, canal de aviso, distancia y radio.
 //   3) Se ordena: primero grupo exacto, después compatible; dentro de cada uno, el más cercano primero.
 //   4) Se recorta al cupo libre de la agenda (eso lo hacen las rutas con cupoLibre()).
+// TP3: en la propuesta, cada candidato suma su distancia por calle (OpenRouteService). Es solo para mostrar:
+// el orden y el radio siguen usando la distancia en línea recta.
 const prisma = require('../lib/prisma');
 const { filtroDonantesHabilitados } = require('./habilitacion');
 const { gruposCompatibles, esGrupoExacto } = require('./compatibilidad');
 const { distanciaKm } = require('./distancia');
+const { distanciasPorCalle } = require('./rutas');
 const { inicioDelMes } = require('./alertas');
 const { obtenerFechaHoy } = require('../utils/validaciones');
 const { parsearFecha } = require('../utils/formateadores');
@@ -43,7 +46,8 @@ function armarMotivo(donante, necesidad, km) {
 
 // Donantes que pueden ser convocados para la necesidad, ya ordenados. No recorta por cupo.
 // institucion: { latitud, longitud }. radioKm: distancia máxima.
-async function buscarCandidatos(necesidad, institucion, radioKm) {
+// porCalle: true para consultar la distancia por calle (TP3). Si es false, o si ORS no responde, queda en null.
+async function buscarCandidatos(necesidad, institucion, radioKm, { porCalle = false } = {}) {
   const hoy = parsearFecha(obtenerFechaHoy());
 
   const donantes = await prisma.donante.findMany({
@@ -68,6 +72,7 @@ async function buscarCandidatos(necesidad, institucion, radioKm) {
   });
 
   const candidatos = [];
+  const ubicaciones = []; // la del donante de cada candidato, en el mismo orden (no sale en la respuesta)
   for (const donante of donantes) {
     if (donante._count.alertas >= donante.topeAlertasMes) continue; // llegó a su tope del mes
     const canal = elegirCanal(donante, necesidad.urgencia);
@@ -88,9 +93,18 @@ async function buscarCandidatos(necesidad, institucion, radioKm) {
       factorRh: donante.factorRh,
       grupoExacto: esGrupoExacto(donante, necesidad),
       distanciaKm: km,
+      distanciaPorCalle: null,
       canal,
       motivo: armarMotivo(donante, necesidad, km),
     });
+    ubicaciones.push({ lat: donante.latitud, lon: donante.longitud });
+  }
+
+  // TP3: una sola consulta a OpenRouteService para todos los candidatos
+  if (porCalle && candidatos.length > 0) {
+    const origen = { lat: institucion.latitud, lon: institucion.longitud };
+    const kmPorCalle = await distanciasPorCalle(origen, ubicaciones);
+    candidatos.forEach((candidato, i) => { candidato.distanciaPorCalle = kmPorCalle[i]; });
   }
 
   // Criterio: ordena por compatibilidad (exacto primero) y después por distancia
