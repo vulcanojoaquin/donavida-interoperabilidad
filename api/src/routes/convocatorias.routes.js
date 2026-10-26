@@ -81,7 +81,8 @@ router.post('/:idNecesidad/convocatoria/propuesta', autenticar, autorizar('insti
     if (!necesidad) return;
 
     const cupo = await cupoLibre(necesidad);
-    const candidatos = await buscarCandidatos(necesidad, necesidad.institucion, radioKm);
+    // TP3: con la distancia por calle. Al confirmar no hace falta: no se guarda ni se muestra
+    const candidatos = await buscarCandidatos(necesidad, necesidad.institucion, radioKm, { porCalle: true });
 
     res.json({
         idNecesidad: necesidad.idNecesidad,

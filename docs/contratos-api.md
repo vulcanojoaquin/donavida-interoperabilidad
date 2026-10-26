@@ -494,6 +494,7 @@ Lista sugerida de donantes para una necesidad `abierta` (TAREA-8). **No guarda n
         "factorRh": "negativo",
         "grupoExacto": true,
         "distanciaKm": 0.3,
+        "distanciaPorCalle": 0.5,
         "canal": "push",
         "motivo": "Mismo grupo (O−). Habilitado para donar. A 0.3 km de la institución."
       }
@@ -502,6 +503,8 @@ Lista sugerida de donantes para una necesidad `abierta` (TAREA-8). **No guarda n
   }
   ```
   `sugeridos` son los que entran en el cupo; `otrosCandidatos`, los que el hospital puede agregar a mano.
+  `distanciaPorCalle` (TP3) son los km por calle según OpenRouteService. Es `null` si el servicio no respondió o no
+  hay `ORS_API_KEY`. Solo se muestra: el orden y el radio usan `distanciaKm` (línea recta).
   `canal`: urgente → primero `push`, normal → primero `email`, siempre uno que el donante tenga activado.
 - **Errores:** 400 `DATOS_INVALIDOS` (radio), 404 `NO_ENCONTRADO`, 409 `CONFLICTO` si la necesidad no está `abierta`.
 

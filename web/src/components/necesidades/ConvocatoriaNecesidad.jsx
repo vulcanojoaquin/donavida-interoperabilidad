@@ -89,11 +89,23 @@ export function ConvocatoriaNecesidad({ necesidad, pedir, onConfirmar, onCancela
                       <strong>{c.nombre} {c.apellido}</strong>
                       <small>{c.motivo} Aviso por {CANALES[c.canal]}.</small>
                     </span>
-                    <span className="convocatoria-km">{c.distanciaKm} km</span>
+                    <span className="convocatoria-km">
+                      {/* TP3: la distancia por calle (OpenRouteService) solo si llegó; si no, como antes */}
+                      {c.distanciaPorCalle == null
+                        ? `${c.distanciaKm} km`
+                        : `${c.distanciaKm} km en línea recta · ${c.distanciaPorCalle} km por calle`}
+                    </span>
                   </label>
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* TP3: atribución que piden OpenRouteService y OpenStreetMap, solo si se muestra la distancia por calle */}
+          {candidatos.some((c) => c.distanciaPorCalle != null) && (
+            <p className="texto-suave">
+              Distancia por calle: © openrouteservice.org by HeiGIT · datos © colaboradores de OpenStreetMap
+            </p>
           )}
 
           <div className="necesidad-acciones">
