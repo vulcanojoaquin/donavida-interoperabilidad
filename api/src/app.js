@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth.routes');
 const donantesRoutes = require('./routes/donantes.routes');
 const aptitudRoutes = require('./routes/aptitud.routes');
 const institucionesRoutes = require('./routes/instituciones.routes');
+const geocodificacionRoutes = require('./routes/geocodificacion.routes');
 const necesidadesRoutes = require('./routes/necesidades.routes');
 const convocatoriasRoutes = require('./routes/convocatorias.routes');
 const alertasRoutes = require('./routes/alertas.routes');
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/donantes', donantesRoutes);
 app.use('/api/donantes', aptitudRoutes); // cuestionario y habilitación (TAREA-3)
 app.use('/api/instituciones', institucionesRoutes);
+app.use('/api/geocodificar', geocodificacionRoutes); // coordenadas de una dirección con Nominatim (TP3)
 app.use('/api/necesidades', necesidadesRoutes);
 app.use('/api/necesidades', convocatoriasRoutes); // selección de donantes a convocar (TAREA-8)
 app.use('/api/alertas', alertasRoutes); // alertas al donante (TAREA-11)
