@@ -8,6 +8,7 @@ const { datosInvalidos } = require('../utils/validaciones');
 const { cerrarVencidas } = require('./necesidades.routes');
 const { buscarCandidatos, cupoLibre } = require('../services/convocatoria');
 const { enviarAlertasDeConvocatoria } = require('../services/alertas');
+const { modoDemo } = require('../services/rutas');
 
 const router = Router();
 
@@ -90,6 +91,7 @@ router.post('/:idNecesidad/convocatoria/propuesta', autenticar, autorizar('insti
         cupo,
         sugeridos: candidatos.slice(0, cupo.disponible),
         otrosCandidatos: candidatos.slice(cupo.disponible),
+        distanciaPorCalleSimulada: modoDemo(), // TP3: true si la distancia por calle es de demostración
     });
 });
 

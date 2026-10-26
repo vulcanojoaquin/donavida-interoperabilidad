@@ -93,7 +93,7 @@ export function ConvocatoriaNecesidad({ necesidad, pedir, onConfirmar, onCancela
                       {/* TP3: la distancia por calle (OpenRouteService) solo si llegó; si no, como antes */}
                       {c.distanciaPorCalle == null
                         ? `${c.distanciaKm} km`
-                        : `${c.distanciaKm} km en línea recta · ${c.distanciaPorCalle} km por calle`}
+                        : `${c.distanciaKm} km en línea recta · ${c.distanciaPorCalle} km por calle${propuesta.distanciaPorCalleSimulada ? ' (simulada)' : ''}`}
                     </span>
                   </label>
                 </li>
@@ -101,12 +101,17 @@ export function ConvocatoriaNecesidad({ necesidad, pedir, onConfirmar, onCancela
             </ul>
           )}
 
-          {/* TP3: atribución que piden OpenRouteService y OpenStreetMap, solo si se muestra la distancia por calle */}
-          {candidatos.some((c) => c.distanciaPorCalle != null) && (
+          {/* TP3: atribución que piden OpenRouteService y OpenStreetMap, solo si se muestra la distancia por calle.
+              En modo demostración (ORS_DEMO) no se consultó a ORS: se avisa que la distancia es simulada */}
+          {candidatos.some((c) => c.distanciaPorCalle != null) && (propuesta.distanciaPorCalleSimulada ? (
+            <div className="alert alert-warning" role="status">
+              Modo demostración: la distancia por calle es simulada (línea recta × 1,3), no viene de OpenRouteService.
+            </div>
+          ) : (
             <p className="texto-suave">
               Distancia por calle: © openrouteservice.org by HeiGIT · datos © colaboradores de OpenStreetMap
             </p>
-          )}
+          ))}
 
           <div className="necesidad-acciones">
             <span>

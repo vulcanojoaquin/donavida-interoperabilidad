@@ -45,6 +45,14 @@ tests automáticos que simulan ORS caído, con tiempo agotado y con errores HTTP
 DonaVida sin la integración: tiene que ser idéntica. A mano se prueba pidiendo una convocatoria con la computadora
 sin conexión a internet: la lista aparece, con la demora máxima de 6 segundos, igual que antes.
 
+## Modo demostración
+
+Para mostrar la pantalla cuando no hay clave o el servicio no está disponible, `ORS_DEMO=true` en `api/.env` hace que
+la API no consulte a ORS y devuelva una distancia por calle simulada: la línea recta × 1,3. Es un supuesto para la
+demostración, no una medición. La pantalla lo avisa: cada distancia dice "(simulada)" y abajo aparece "Modo
+demostración: la distancia por calle es simulada". El orden de la lista no cambia. Con `ORS_DEMO=false`, el valor por
+defecto, funciona con OpenRouteService como se describe arriba.
+
 ## Condiciones de uso respetadas
 
 La clave está en `api/.env`, que no se sube al repositorio, y nunca en el código. Se respeta el límite del plan

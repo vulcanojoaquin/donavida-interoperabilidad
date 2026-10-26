@@ -48,6 +48,7 @@ beforeEach(() => {
 afterEach(() => {
   jest.restoreAllMocks();
   delete process.env.ORS_API_KEY;
+  delete process.env.ORS_DEMO;
 });
 
 describe('distanciasPorCalle', () => {
@@ -128,6 +129,27 @@ describe('distanciasPorCalle', () => {
     expect(km).toHaveLength(3501);
     expect(km.every((valor) => valor === null)).toBe(true);
     expect(fetchSimulado).not.toHaveBeenCalled();
+  });
+});
+
+describe('Modo demostración (ORS_DEMO=true)', () => {
+  test('devuelve la línea recta × 1,3 sin consultar a ORS, aunque no haya clave', async () => {
+    process.env.ORS_DEMO = 'true';
+    delete process.env.ORS_API_KEY;
+    const km = await distanciasPorCalle(OBELISCO, [PLAZA_DE_MAYO, LA_PLATA]);
+
+    expect(fetchSimulado).not.toHaveBeenCalled();
+    const { distanciaKm } = require('../src/services/distancia');
+    const recta = distanciaKm(OBELISCO.lat, OBELISCO.lon, PLAZA_DE_MAYO.lat, PLAZA_DE_MAYO.lon);
+    expect(km[0]).toBeCloseTo(recta * 1.3, 1);
+    expect(km[1]).toBeGreaterThan(km[0]);
+  });
+
+  test('con cualquier otro valor funciona como siempre', async () => {
+    process.env.ORS_DEMO = 'false';
+    fetchSimulado.mockResolvedValue(matriz(1.5));
+    expect(await distanciasPorCalle(OBELISCO, [PLAZA_DE_MAYO])).toEqual([1.5]);
+    expect(fetchSimulado).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -219,6 +241,17 @@ describe('Convocatoria con la distancia por calle', () => {
     expect(lista(conOrsCaido).map((c) => c.idDonante)).toEqual(ORDEN_DE_HOY);
     expect(lista(conOrsCaido).every((c) => c.distanciaPorCalle === null)).toBe(true);
     expect(lista(conOrsCaido).every((c) => typeof c.distanciaKm === 'number')).toBe(true);
+  });
+
+  test('la propuesta avisa si la distancia por calle es simulada', async () => {
+    fetchSimulado.mockResolvedValue(matriz(57.31, 1.92, 1.48));
+    expect((await proponer()).body.distanciaPorCalleSimulada).toBe(false);
+
+    process.env.ORS_DEMO = 'true';
+    const demo = await proponer();
+    expect(demo.body.distanciaPorCalleSimulada).toBe(true);
+    expect(lista(demo).map((c) => c.idDonante)).toEqual(ORDEN_DE_HOY); // el orden tampoco cambia
+    expect(lista(demo).every((c) => c.distanciaPorCalle > c.distanciaKm)).toBe(true);
   });
 
   test('al confirmar la convocatoria no consulta a ORS', async () => {
