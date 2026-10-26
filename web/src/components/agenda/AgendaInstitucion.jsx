@@ -37,6 +37,25 @@ export function AgendaInstitucion({ token, apiUrl }) {
     }
   }, [pedir, version])
 
+  // TP3: si el día elegido es feriado (Nager.Date), un aviso. No impide abrir la franja: un hospital puede atender un feriado.
+  // Si es un día común o no se pudo verificar (sin conexión, API caída), no se muestra nada.
+  const [feriado, setFeriado] = useState(null) // { fecha, nombre } del último día consultado que resultó feriado
+  useEffect(() => {
+    if (!formData.fecha) return
+    let activo = true
+    fetch(`${apiUrl}/api/feriados/es-feriado?fecha=${formData.fecha}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((datos) => {
+        if (activo && datos?.esFeriado === true) setFeriado({ fecha: formData.fecha, nombre: datos.nombre })
+      })
+      .catch(() => {}) // sin aviso: no se avisa de algo que no se sabe
+    return () => {
+      activo = false
+    }
+  }, [apiUrl, formData.fecha])
+  // Solo se muestra si corresponde a la fecha que está elegida ahora
+  const avisoFeriado = feriado && feriado.fecha === formData.fecha ? feriado : null
+
   const ejecutar = async (accion, textoExito) => {
     setOcupado(true)
     setMensaje(null)
@@ -105,6 +124,11 @@ export function AgendaInstitucion({ token, apiUrl }) {
           {ocupado ? 'Guardando...' : '+ Abrir franja'}
         </button>
       </form>
+      {avisoFeriado && (
+        <div className="alert alert-warning" role="status">
+          {avisoFeriado.fecha.slice(8, 10)}/{avisoFeriado.fecha.slice(5, 7)} es feriado: {avisoFeriado.nombre}. Podés abrir la franja igual.
+        </div>
+      )}
 
       {cargando && <Esqueleto />}
       {!cargando && franjas.length === 0 && (
