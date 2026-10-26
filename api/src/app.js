@@ -32,6 +32,7 @@ app.use('/api/alertas', alertasRoutes); // alertas al donante (TAREA-11)
 app.use('/api/push', pushRoutes); // suscripción a notificaciones push (TAREA-11)
 app.use('/api/unidades', unidadesRoutes); // ingreso de unidades de sangre (TAREA-5)
 app.use('/api/franjas', franjasRoutes); // agenda de la institución (TAREA-10)
+app.use('/api/feriados', require('./routes/feriados.routes')); // feriados de Argentina con Nager.Date (TP3)
 app.use('/api/turnos', turnosRoutes); // reserva de turnos del donante (TAREA-10)
 app.use('/api/donaciones', donacionesRoutes); // registro de la donación e historial (DV-11)
 app.use('/api/publico', publicoRoutes); // datos de la página de inicio, sin login
