@@ -3,6 +3,56 @@
 Red de donación de sangre en tiempo real y gestión de inventario entre bancos de sangre.
 Trabajo Final de la Tecnicatura en Desarrollo Web — Grupo Código Rojo (Alday, Pizarro, Vulcano).
 
+## Trabajo Práctico N°3 (Frameworks e Interoperabilidad)
+
+Este repositorio es una copia del Trabajo Final ([fidelpizarro3/donavida](https://github.com/fidelpizarro3/donavida))
+tal como quedó en el Sprint 2, para hacer acá el TP3 de Frameworks e Interoperabilidad sin mezclar las dos materias.
+Los repositorios no están conectados: lo que se sube acá no llega al del Trabajo Final, ni al revés.
+
+### Antes de arrancar (si ya tenías clonado el Trabajo Final)
+
+**1. Aceptá la invitación** de colaborador que te llegó por mail desde GitHub.
+
+**2. Cloná este repo en una carpeta nueva.** No reutilices la carpeta del Trabajo Final. Mejor fuera de OneDrive,
+porque OneDrive intenta sincronizar los miles de archivos de `node_modules`.
+
+```bash
+git clone https://github.com/vulcanojoaquin/donavida-interoperabilidad.git
+```
+
+**3. Copiá tu `api/.env`** desde la carpeta del Trabajo Final a la misma ruta en la carpeta nueva. Git lo ignora:
+no se sube.
+
+**4. Instalá las dependencias y generá el cliente de Prisma:**
+
+```bash
+cd api
+npm install
+npx prisma generate
+cd ../web
+npm install
+```
+
+`npx prisma generate` hace falta una vez: sin eso los tests pasan (simulan la base), pero la API no arranca y muestra
+`@prisma/client did not initialize yet`.
+
+**5. Base de datos: es la misma que la del Trabajo Final.** `docker-compose.yml` fija el nombre del proyecto en
+`donavida`, así que las dos carpetas usan los mismos contenedores y los mismos datos. Si la base ya está levantada no
+hay que hacer nada; si está apagada, `docker compose up -d` desde cualquiera de las dos carpetas.
+**No corras `docker compose down -v`:** borra los datos de las dos.
+
+**6. Comprobá que todo anda** antes de tocar nada:
+
+| Dónde | Comando | Resultado esperado |
+|---|---|---|
+| `api/` | `npm test` | Todos los tests pasan |
+| `web/` | `npm run lint` | Sin errores |
+| `web/` | `npm run build` | Build sin errores |
+| `api/` | `npm run dev` | http://localhost:3000/api/health responde `{"ok":true}` |
+
+Si no tenías el Trabajo Final clonado, seguí [Levantar el proyecto por primera vez](#levantar-el-proyecto-por-primera-vez):
+ahí `npm run db:migrate` crea las tablas y también genera el cliente de Prisma.
+
 ## Estructura
 
 ```
